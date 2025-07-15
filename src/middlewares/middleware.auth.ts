@@ -3,7 +3,7 @@ import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import {Blacklist} from "../models/models.blacklist";
+
 
 interface JwtPayload {
   id: string;
@@ -33,16 +33,8 @@ const verifyUserToken = asyncHandler(async (req: Request, res: Response, next: N
     throw new ApiError(401, "Access Denied / Unauthorized request: Token is missing.");
   }
   
-  if (token === 'null') { 
-    throw new ApiError(401, "Access Denied / Unauthorized request: Token is invalid (null string).");
-  }
 
     try{
-           const isBlacklisted = await Blacklist.findOne({ token });
-            if (isBlacklisted) {
-                  throw new ApiError(401, "Token is invalid")
-            }
-
     const verifiedUser = jwt.verify(token, `${process.env.JWT_SECRET}`) as JwtPayload; 
 
     req.user = verifiedUser;
@@ -54,7 +46,7 @@ const verifyUserToken = asyncHandler(async (req: Request, res: Response, next: N
    next();
 
     }catch(err){
-      throw new ApiError(404, "Error during token verfication / user is unauthorized");
+      throw new ApiError(401, "Error during token verfication / user is unauthorized");
     }
  
 });

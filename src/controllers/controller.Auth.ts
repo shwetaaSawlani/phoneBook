@@ -12,7 +12,7 @@ import * as EmailValidator from 'email-validator';
 
 const registerUser = asyncHandler(async (req: Request, res: Response) => {
     
-    const { name, email, password } = req.body;
+    const { username, email, password } = req.body;
     
     if (!email || !password) {
         throw new ApiError(400, "Email and Password are required to Register");
@@ -31,12 +31,13 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
   
     const lowercasedEmail = email.toLowerCase();
     const userExist = await User.findOne({ email: lowercasedEmail });
+    
     if (userExist) {
         throw new ApiError(409, "User already exists with this email. Please log in or use a different email.");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10); 
-    const user = await User.create({ name, email: lowercasedEmail, password: hashedPassword });
+    const user = await User.create({ name : username, email: lowercasedEmail, password: hashedPassword });
 
     if (!user) {
         throw new ApiError(500, "Failed to create user. Please try again.");
@@ -69,13 +70,13 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
             maxAge: 24 * 60 * 60 * 1000
         });
     
-
+   console.log("username", user.name);
     res.status(201).json( 
         new ApiResponse(201, 
             {
                 user: {
                     _id: user._id,
-                    name: user.name,
+                    username: user.name,
                     email: user.email,
                 },
                 token
@@ -84,10 +85,6 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
     );
 
 });
-
-
-
-
 
 
 

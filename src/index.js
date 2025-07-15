@@ -6,10 +6,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require('dotenv').config();
 const db_1 = __importDefault(require("./db/db"));
 const app_1 = require("./app");
+const https_1 = __importDefault(require("https"));
+const fs_1 = __importDefault(require("fs"));
+const options = {
+    key: fs_1.default.readFileSync('key.pem', 'utf8'),
+    cert: fs_1.default.readFileSync('certificate.pem', 'utf8')
+};
+const httpsServer = https_1.default.createServer(options, app_1.app);
 (0, db_1.default)()
     .then(() => {
-    app_1.app.listen(process.env.PORT || 8000, () => {
-        console.log(`Server is running at port : ${process.env.PORT}`);
+    httpsServer.listen(`${process.env.PORT}`, () => {
+        console.log(`HTTPS server listening on port ${process.env.PORT}`);
     });
 })
     .catch((err) => {

@@ -56,7 +56,7 @@ const models_blacklist_1 = require("../models/models.blacklist");
 const PasswordValidator_1 = require("../utils/PasswordValidator");
 const EmailValidator = __importStar(require("email-validator"));
 const registerUser = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, email, password } = req.body;
+    const { username, email, password } = req.body;
     if (!email || !password) {
         throw new ApiError_1.ApiError(400, "Email and Password are required to Register");
     }
@@ -74,7 +74,7 @@ const registerUser = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(vo
         throw new ApiError_1.ApiError(409, "User already exists with this email. Please log in or use a different email.");
     }
     const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
-    const user = yield models_user_1.User.create({ name, email: lowercasedEmail, password: hashedPassword });
+    const user = yield models_user_1.User.create({ name: username, email: lowercasedEmail, password: hashedPassword });
     if (!user) {
         throw new ApiError_1.ApiError(500, "Failed to create user. Please try again.");
     }
@@ -94,10 +94,11 @@ const registerUser = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(vo
         secure: true,
         maxAge: 24 * 60 * 60 * 1000
     });
+    console.log("username", user.name);
     res.status(201).json(new ApiResponse_1.ApiResponse(201, {
         user: {
             _id: user._id,
-            name: user.name,
+            username: user.name,
             email: user.email,
         },
         token
@@ -145,13 +146,13 @@ const logout = (0, asyncHandler_1.asyncHandler)((req, res) => __awaiter(void 0, 
         throw new ApiError_1.ApiError(401, "Access Denied / Unauthorized request: No token provided or invalid format.");
     }
     const token = authHeader.split(' ')[1];
-    console.log(token);
     if (!token) {
         throw new ApiError_1.ApiError(401, "Access Denied / Unauthorized request: Token is missing.");
     }
     if (token === 'null') {
         throw new ApiError_1.ApiError(401, "Access Denied / Unauthorized request: Token is invalid (null string).");
     }
+    console.log(token);
     const checkIfBlacklisted = yield models_blacklist_1.Blacklist.findOne({ token: token });
     if (checkIfBlacklisted) {
         throw new ApiError_1.ApiError(400, "Please login Again");

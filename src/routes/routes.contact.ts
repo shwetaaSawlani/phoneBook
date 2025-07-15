@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { registerContact, updateContactByName, deleteContactByName, getContactByName, getContactsByLabel, toggleBookmark } from "../controllers/controller.contact.js";
+import { registerContact, updateContactById, deleteContactById, getContactByName, getContactsByLabel, toggleBookmark } from "../controllers/controller.contact.js";
 import { upload } from "../middlewares/middleware.multer.js";
-import { uploadOnCloudinary } from "../utils/Cloudinary.js";
 import {getAllContacts} from "../controllers/controller.contact.js"
-
+import { searchContacts } from "../controllers/controller.contact.js";
+import { verifyUserToken } from "../middlewares/middleware.auth";
 
 const router = Router();
 
@@ -53,7 +53,7 @@ const router = Router();
  *       400:
  *         description: Bad request (missing or invalid fields)
  */
-router.route("/register").post(
+router.route("/register").post(verifyUserToken,
   upload.single("avatar"),
   registerContact
 );
@@ -90,8 +90,9 @@ router.route("/register").post(
  *       404:
  *         description: Contact not found
  */
-router.route("/update/:name").put(updateContactByName);
+// router.route("/update/:name").put(verifyUserToken, upload.single('avatar'),updateContactByName);
 
+router.route("/update/:id").put(verifyUserToken, upload.single('avatar'),updateContactById);
 /**
  * @swagger
  * /api/v1/contact/delete/{name}:
@@ -111,7 +112,8 @@ router.route("/update/:name").put(updateContactByName);
  *       404:
  *         description: Contact not found
  */
-router.route("/delete/:name").delete(deleteContactByName);
+// router.route("/delete/:name").delete(verifyUserToken, deleteContactByName);
+router.route("/delete/:id").delete(verifyUserToken, deleteContactById);
 
 /**
  * @swagger
@@ -132,7 +134,7 @@ router.route("/delete/:name").delete(deleteContactByName);
  *       404:
  *         description: Contact not found
  */
-router.route("/get/:name").get(getContactByName);
+router.route("/get/:name").get(verifyUserToken,getContactByName);
 
 /**
  * @swagger
@@ -151,7 +153,7 @@ router.route("/get/:name").get(getContactByName);
  *       200:
  *         description: List of contacts with the given label
  */
-router.route("/getlabel/:label").get(getContactsByLabel);
+router.route("/getlabel/:label").get(verifyUserToken,getContactsByLabel);
 
 /**
  * @swagger
@@ -172,9 +174,11 @@ router.route("/getlabel/:label").get(getContactsByLabel);
  *       404:
  *         description: Contact not found
  */
-router.route("/update/bookmark/:name").put(toggleBookmark);
+// router.route("/update/bookmark/:name").put(verifyUserToken,toggleBookmark);
+router.route("/update/bookmark/:id").put(verifyUserToken, toggleBookmark);
+router.route("/ContactList").get(verifyUserToken,getAllContacts);
+router.route("/search/:query").get(verifyUserToken, searchContacts);
 
-router.route("/ContactList").get(getAllContacts);
 
 export default router;
 

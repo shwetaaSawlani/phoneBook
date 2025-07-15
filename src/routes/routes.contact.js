@@ -4,6 +4,8 @@ const express_1 = require("express");
 const controller_contact_js_1 = require("../controllers/controller.contact.js");
 const middleware_multer_js_1 = require("../middlewares/middleware.multer.js");
 const controller_contact_js_2 = require("../controllers/controller.contact.js");
+const controller_contact_js_3 = require("../controllers/controller.contact.js");
+const middleware_auth_1 = require("../middlewares/middleware.auth");
 const router = (0, express_1.Router)();
 /**
  * @swagger
@@ -51,7 +53,7 @@ const router = (0, express_1.Router)();
  *       400:
  *         description: Bad request (missing or invalid fields)
  */
-router.route("/register").post(middleware_multer_js_1.upload.single("avatar"), controller_contact_js_1.registerContact);
+router.route("/register").post(middleware_auth_1.verifyUserToken, middleware_multer_js_1.upload.single("avatar"), controller_contact_js_1.registerContact);
 /**
  * @swagger
  * /api/v1/contact/update/{name}:
@@ -84,7 +86,8 @@ router.route("/register").post(middleware_multer_js_1.upload.single("avatar"), c
  *       404:
  *         description: Contact not found
  */
-router.route("/update/:name").put(controller_contact_js_1.updateContactByName);
+// router.route("/update/:name").put(verifyUserToken, upload.single('avatar'),updateContactByName);
+router.route("/update/:id").put(middleware_auth_1.verifyUserToken, middleware_multer_js_1.upload.single('avatar'), controller_contact_js_1.updateContactById);
 /**
  * @swagger
  * /api/v1/contact/delete/{name}:
@@ -104,7 +107,8 @@ router.route("/update/:name").put(controller_contact_js_1.updateContactByName);
  *       404:
  *         description: Contact not found
  */
-router.route("/delete/:name").delete(controller_contact_js_1.deleteContactByName);
+// router.route("/delete/:name").delete(verifyUserToken, deleteContactByName);
+router.route("/delete/:id").delete(middleware_auth_1.verifyUserToken, controller_contact_js_1.deleteContactById);
 /**
  * @swagger
  * /api/v1/contact/get/{name}:
@@ -124,7 +128,7 @@ router.route("/delete/:name").delete(controller_contact_js_1.deleteContactByName
  *       404:
  *         description: Contact not found
  */
-router.route("/get/:name").get(controller_contact_js_1.getContactByName);
+router.route("/get/:name").get(middleware_auth_1.verifyUserToken, controller_contact_js_1.getContactByName);
 /**
  * @swagger
  * /api/v1/contact/getlabel/{label}:
@@ -142,7 +146,7 @@ router.route("/get/:name").get(controller_contact_js_1.getContactByName);
  *       200:
  *         description: List of contacts with the given label
  */
-router.route("/getlabel/:label").get(controller_contact_js_1.getContactsByLabel);
+router.route("/getlabel/:label").get(middleware_auth_1.verifyUserToken, controller_contact_js_1.getContactsByLabel);
 /**
  * @swagger
  * /api/v1/contact/update/bookmark/{name}:
@@ -162,11 +166,8 @@ router.route("/getlabel/:label").get(controller_contact_js_1.getContactsByLabel)
  *       404:
  *         description: Contact not found
  */
-router.route("/update/bookmark/:name").put(controller_contact_js_1.toggleBookmark);
-router.route("/ContactList").get(controller_contact_js_2.getAllContacts);
-// router.route("/register/user").post(registerUser);
-// router.route("/login/user").post(login);
-// router.route("/home").get(verifyUserToken, home);
-// router.route("/logout").post(logout);
-// router.route("/generatetoken").post(accessToken);
+// router.route("/update/bookmark/:name").put(verifyUserToken,toggleBookmark);
+router.route("/update/bookmark/:id").put(middleware_auth_1.verifyUserToken, controller_contact_js_1.toggleBookmark);
+router.route("/ContactList").get(middleware_auth_1.verifyUserToken, controller_contact_js_2.getAllContacts);
+router.route("/search/:query").get(middleware_auth_1.verifyUserToken, controller_contact_js_3.searchContacts);
 exports.default = router;
